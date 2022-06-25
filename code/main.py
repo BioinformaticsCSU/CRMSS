@@ -75,37 +75,30 @@ def main(parser):
     # load data
     pos_set, neg_set, bindSiteDict_pos, bindSiteDict_neg = read_fasta_file(protein) # load postive samples and negative samples
 
-    # forming training samples and test samples
     bindsite_all = pos_set + neg_set
     dataY = np.array([1] * len(pos_set) + [0] * len(neg_set))
     dataY = to_categorical(dataY)
     indexes = np.random.choice(len(bindsite_all), len(bindsite_all), replace=False)  # randomly extract elements
     training_idx, test_idx = indexes[:round(((len(bindsite_all)) / 10) * 8)], indexes[
                                                                               round(((len(bindsite_all)) / 10) * 8):]
-    train_label, test_label = dataY[training_idx, :], dataY[test_idx, :]
+    train_label = dataY[training_idx, :]
 
     train_bind_samples = np.array(bindsite_all)[training_idx]
-    test_bind_samples = np.array(bindsite_all)[test_idx]
 
     xSeq_tr, xDotBrack_tr, xLoopType_tr = seqStructMapping(train_bind_samples, bindSiteDict_pos, bindSiteDict_neg)
-    xSeq_test, xDotBrack_test, xLoopType_test = seqStructMapping(test_bind_samples, bindSiteDict_pos, bindSiteDict_neg)
 
     vocabDict1, embedding_matrix1 = getVocabIndex_pretrained(k_mer)
     embedding_tr1 = pad_sequences(encodeSeqIndex(xSeq_tr, k_mer, vocabDict1), padding="post", maxlen=seq_len)
-    embedding_test1 = pad_sequences(encodeSeqIndex(xSeq_test, k_mer, vocabDict1), padding="post", maxlen=seq_len)
 
     basePair_pos = basePair_Score('PreviousData/positive_profile.out', protein)
     basePair_neg = basePair_Score('PreviousData/negative_profile.out', protein)
     tmpBasePair = np.concatenate((basePair_pos, basePair_neg), axis=0)
     basePair_tr = tmpBasePair[training_idx.tolist()]
     basePair_tr = basePair_tr.astype(np.float)
-    basePair_test = tmpBasePair[test_idx.tolist()]
-    basePair_test = basePair_test.astype(np.float)
+
 
     rbpchem_dict = getRBPBioChem()
     rbpchem_tr = pad_sequences(np.array([rbpchem_dict[i[1]] for i in train_bind_samples.tolist()]), padding='post',
-                               dtype='float', maxlen=168)
-    rbpchem_test = pad_sequences(np.array([rbpchem_dict[i[1]] for i in test_bind_samples.tolist()]), padding='post',
                                dtype='float', maxlen=168)
 
     # logging info
@@ -114,9 +107,7 @@ def main(parser):
     logging.debug("Loading data...")
 
    
-    test_y = test_label[:, 1]
-    kf = KFold(5, True)    
-
+    kf = KFold(5, True)
     i = 0
 
     for train_index, eval_index in kf.split(train_label):
@@ -129,7 +120,6 @@ def main(parser):
         eval_X2 = basePair_tr[eval_index]
         eval_X3 = rbpchem_tr[eval_index]  
         eval_y = train_label[eval_index]
-
 
         [MODEL_PATH, CHECKPOINT_PATH, LOG_PATH, RESULT_PATH] = defineExperimentPaths(basic_path, str(i))
         logging.debug("Loading network/training configuration...")
@@ -177,8 +167,6 @@ def main(parser):
             shuffle=True)
         endTime = time.time()
         logging.debug("make prediction")
-        ss_y_hat_test = model.predict(
-            {'embedding_input1': embedding_test1, 'profile_input': basePair_test, 'rbp_input': rbpchem_test})     
 
         i = i + 1
    
