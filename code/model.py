@@ -1,3 +1,4 @@
+#This script contains the main content of the CRMSS model. 
 import keras
 from keras.callbacks import EarlyStopping, ModelCheckpoint, LearningRateScheduler
 from keras.layers import Activation, add, Convolution1D, Convolution2D, Dense, Dropout, Embedding
