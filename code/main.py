@@ -1,3 +1,4 @@
+#This script contains a training process which trains models for each RBP and finds the best set of hyperparameters. 
 import keras
 from keras.callbacks import EarlyStopping, ModelCheckpoint, LearningRateScheduler
 from keras.layers import Activation, add, Convolution1D, Convolution2D, Dense, Dropout, Embedding
