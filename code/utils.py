@@ -1,3 +1,4 @@
+#This script contains functions for data reading and feature generation. 
 import argparse
 import time
 import math
