@@ -33,9 +33,11 @@ These two files are sequence inputs of CRMSS. File positive.out contains sequenc
 1) model.py
 
 This script contains the main content of the CRMSS model. 
+
 2) main.py
 
 This script contains a training process which trains models for each RBP and finds the best set of hyperparameters. 
+
 3) utils.py
 This script contains functions for data reading and feature generation. 
 
@@ -63,6 +65,7 @@ There are two parsers you can set as you need:
 *--proteinID*	
 
 Select the RBP you want to train a model for. By default, CRMSS will train a model for all 37 RBPs.
+
 *--storage*	
 
 Select the paths you want to store the training results.
